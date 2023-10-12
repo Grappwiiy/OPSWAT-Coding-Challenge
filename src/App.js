@@ -14,6 +14,9 @@ export default function OPSWAT() {
   const apiKey = process.env.REACT_APP_OPSWAT_API_KEY;
 
 
+  //ERORI
+  const [errorHandler, setErrorHandler] = useState('');
+
 //Manipulator pentru fisierul incarcat
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -21,6 +24,9 @@ export default function OPSWAT() {
     if (file) {
       setSelectedFile(file);
       calculateHash(file);
+      setErrorHandler('');
+    }else {
+      setErrorHandler("Error loading the file!");
     }
   };
 
@@ -37,6 +43,10 @@ export default function OPSWAT() {
         .map((byte) => byte.toString(16).padStart(2, '0'))
         .join('');
       setHash256Scan(hashHex);
+    };
+
+    reader.onerror = () => {
+      setErrorHandler("Error generating HASH!");
     };
 
     reader.readAsArrayBuffer(file);
@@ -92,7 +102,7 @@ export default function OPSWAT() {
       const uploadResult = await uploadResponse.json();
       setDataID(uploadResult.data_id);
       } catch (e) {
-      console.log(e);
+        setErrorHandler("Error scanning the file!");
     }
   }
 
@@ -120,6 +130,7 @@ export default function OPSWAT() {
         });
       }
     }catch (e) {
+      setErrorHandler("Error polling file!");
       console.log(e);
     }
 
@@ -146,6 +157,10 @@ export default function OPSWAT() {
 
   return (
     <div className="opswatCoding">
+      {errorHandler !== '' && (
+        <p className="errorHandler">{errorHandler}</p>
+      )}
+
 
     <label className="customFileUpload">
         <input className="inputFile" type="file" onChange={handleFileChange}/>
@@ -198,7 +213,6 @@ export default function OPSWAT() {
           )}
         </div>
       )}    
-
       <p className="noteText">*Note: I made the application using buttons to be able to visualize each step it takes.</p>
     </div>
   );
